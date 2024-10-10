@@ -1,0 +1,38 @@
+version: '3'
+services:
+  r-p:
+    image: traefik:v3.1
+    command: --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./acme.json:/acme.json
+    networks:
+      - r-p
+    labels:
+      - traefik.http.middlewares.https_redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https_redirect.redirectscheme.permanent=true
+      - traefik.http.middlewares.SslHeader.headers.frameDeny=true
+      - traefik.http.middlewares.SslHeader.headers.SslRedirect=true
+      - traefik.http.middlewares.SslHeader.headers.AccessControlAllowMethods=GET,OPTIONS,PUT
+      - traefik.http.middlewares.SslHeader.headers.AccessControlAllowOrigin=origin-list-or-null
+      - traefik.http.middlewares.SslHeader.headers.AccessControlMaxAge=100
+      - traefik.http.middlewares.SslHeader.headers.AddVaryHeader=true
+      - traefik.http.middlewares.SslHeader.headers.BrowserXssFilter=true
+      - traefik.http.middlewares.SslHeader.headers.ContentTypeNosniff=true
+      - traefik.http.middlewares.SslHeader.headers.ForceSTSHeader=true
+      - traefik.http.middlewares.SslHeader.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.SslHeader.headers.STSPreload=true
+      - traefik.http.middlewares.SslHeader.headers.ContentSecurityPolicy=default-src 'self' 'unsafe-eval'
+      - traefik.http.middlewares.SslHeader.headers.ReferrerPolicy=same-origin
+      - traefik.http.middlewares.SslHeader.headers.FeaturePolicy="vibrate 'self'"
+      - traefik.http.middlewares.SslHeader.headers.STSSeconds=31536000
+      - traefik.http.middlewares.autodetect.contenttype=true
+      - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+networks:
+  r-p:
+    external: true
